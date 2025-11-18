@@ -1,0 +1,124 @@
+import json
+import os
+
+# ============================================================
+# Persistência de Dados (JSON)
+# ============================================================
+
+def verificar_arquivos():
+    """Garante que os arquivos JSON existam. Se não existirem, cria com uma lista vazia."""
+    arquivos = ["tarefas.json", "tarefas_arquivadas.json"]
+
+    for nome in arquivos:
+        if not os.path.exists(nome):
+            with open(nome, "w", encoding="utf-8") as arquivo:
+                json.dump([], arquivo, indent=4, ensure_ascii=False)
+
+
+def carregar_dados(nome_arquivo):
+    """Carrega dados do arquivo JSON."""
+    try:
+        with open(nome_arquivo, "r", encoding="utf-8") as arquivo:
+            return json.load(arquivo)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []  # Se o arquivo não existe ou está corrompido
+
+
+def salvar_dados(nome_arquivo, lista):
+    """Salva dados no arquivo JSON."""
+    with open(nome_arquivo, "w", encoding="utf-8") as arquivo:
+        json.dump(lista, arquivo, indent=4, ensure_ascii=False)
+
+
+def inicializar_dados():
+    """Inicializa o sistema: garante arquivos e carrega as listas."""
+    verificar_arquivos()
+    tarefas = carregar_dados("tarefas.json")
+    tarefas_arquivadas = carregar_dados("tarefas_arquivadas.json")
+    return tarefas, tarefas_arquivadas
+
+
+# ============================================================
+# Funções de Tarefas
+# ============================================================
+
+def listar_tarefas(tarefas):
+    if not tarefas:
+        print("\nNenhuma tarefa cadastrada.\n")
+    else:
+        print("\n=== LISTA DE TAREFAS ===")
+        for i, tarefa in enumerate(tarefas):
+            print(f"{i+1}. {tarefa}")
+        print()
+
+
+def adicionar_tarefa(tarefas):
+    nova = input("Digite a nova tarefa: ").strip()
+    if nova:
+        tarefas.append(nova)
+        print("Tarefa adicionada!\n")
+    else:
+        print("Tarefa inválida.\n")
+
+
+def remover_tarefa(tarefas, tarefas_arquivadas):
+    listar_tarefas(tarefas)
+    if not tarefas:
+        return
+
+    try:
+        indice = int(input("Número da tarefa para remover: ")) - 1
+        tarefa = tarefas.pop(indice)
+        tarefas_arquivadas.append(tarefa)
+        print("Tarefa arquivada com sucesso!\n")
+    except:
+        print("Número inválido.\n")
+
+
+# ============================================================
+# Programa Principal
+# ============================================================
+
+def main():
+    # INICIALIZAÇÃO (carrega JSON e cria arquivos)
+    tarefas, tarefas_arquivadas = inicializar_dados()
+
+    while True:
+        print("=========== MENU ===========")
+        print("[1] Listar tarefas")
+        print("[2] Adicionar tarefa")
+        print("[3] Remover/arquivar tarefa")
+        print("[0] Sair")
+        print("============================")
+
+        try:
+            opcao = int(input("Escolha uma opção: "))
+        except:
+            print("Opção inválida!\n")
+            continue
+
+        # ================= LÓGICA DO MENU =================
+
+        if opcao == 1:
+            listar_tarefas(tarefas)
+
+        elif opcao == 2:
+            adicionar_tarefa(tarefas)
+
+        elif opcao == 3:
+            remover_tarefa(tarefas, tarefas_arquivadas)
+
+        elif opcao == 0:
+            #  SALVAMENTO ANTES DE SAIR 
+            salvar_dados("tarefas.json", tarefas)
+            salvar_dados("tarefas_arquivadas.json", tarefas_arquivadas)
+
+            print("Dados salvos. Encerrando o programa...")
+            break
+
+        else:
+            print("Opção desconhecida.\n")
+
+
+# Iniciar o programa
+main()
