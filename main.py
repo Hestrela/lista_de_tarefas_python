@@ -127,7 +127,7 @@ def menu():
         break
 
       case _:
-        print("Digite uma opção válida (de 1 a 6).")
+        print("Digite uma opção válida (de 1 a 8).")
         limpar_tela()
 
 def criar_tarefa(prioridades):
